@@ -1,13 +1,14 @@
 # coding=utf-8
 import mariadb
+import sqlite3
 
 def create_connection():
     try:
         user_setting={
-            "user":"411077014",
-            "password":"411077014",
+            "user":"411077026",
+            "password":"411077026",
             "host":"140.127.74.226",
-            "database":"411077014"}
+            "database":"411077026"}
         connection = mariadb.connect(**user_setting)
         return connection
     except mariadb.Error as e:
@@ -38,43 +39,12 @@ def maxCostCustomer(connection):
     try:
         cursor = connection.cursor()
         query = """
-            SELECT cus_name
-            FROM (
-                SELECT customer.cus_name, SUM(sale_data.total_price) AS total_amount,
-                ROW_NUMBER() OVER (ORDER BY SUM(sale_data.total_price) DESC) AS row_num
-                FROM sale_data
-                INNER JOIN customer ON sale_data.cus_id = customer.cus_id
-                WHERE sale_data.sale_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
-                GROUP BY customer.cus_name
-            ) AS subquery
-            WHERE row_num = 1
-        """
-        cursor.execute(query)
-        result = cursor.fetchall()
-        for row in result:
-            print(row)
-        print()
-        cursor.close()
-    except mariadb.Error as e:
-        print(f"資料庫錯誤: {e}\n")
-
-def maxCostCustomer1(connection):
-    try:
-        cursor = connection.cursor()
-        query = """
             SELECT cus_name 
             FROM customer 
-            WHERE cus_id IN (
-                SELECT cus_id
-                FROM sale_data
-                WHERE sale_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
-                GROUP BY cus_id
-                ORDER BY SUM(total_price) DESC
-                LIMIT 1
-            )
+            ORDER BY cumu_consump DESC
         """
         cursor.execute(query)
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         for row in result:
             print(row)
         print()
@@ -85,9 +55,21 @@ def maxCostCustomer1(connection):
 def topTwoTotalPrice(connection):
     try:
         cursor = connection.cursor()
-        # query = f"SELECT item_name FROM sale_data,item CROSS APPLY (VALUES (ca.C2),(ca.C3),(ca.C4)) AS T(C) roup by ca.C1,ca.C2,ca.c3,ca.c4"
-
-        # SELECT item_name FROM sale_data,item  MAX(total_price)、max(total_price"
+        query ="""
+            SELECT item1_number, item2_number, item3_number, item4_number, item5_number, item6_number, item7_number, item8_number, item9_number, item10_number, item11_number, item12_number, item13_number, item14_number, item15_number, item16_number, item17_number, item18_number, item19_number, item20_number, item21_number, item22_number, item23_number, item24_number 
+            FROM sale_data 
+            WHERE when='total_price'
+        """
+        cursor.execute(query)
+        row = cursor.fetchall()
+        data = list(row)
+        largest_value = max(data)
+        #不對啊，這樣還是不知道是哪個商品。而且還只有最大的
+        query ="""
+            SELECT item1_number, item2_number, item3_number, item4_number, item5_number, item6_number, item7_number, item8_number, item9_number, item10_number, item11_number, item12_number, item13_number, item14_number, item15_number, item16_number, item17_number, item18_number, item19_number, item20_number, item21_number, item22_number, item23_number, item24_number 
+            FROM sale_data 
+            WHERE largest_value='total_price'
+        """
         cursor.execute(query)
         result = cursor.fetchall()
         for row in result:
@@ -133,13 +115,13 @@ def findruined(connection):
         cursor = connection.cursor()
         cus1 = f"select customer from trans_info,order,customer where (trans_info.state=”損壞” AND trans_info.order_id= order.order_id AND order.cus_id = customer.cus_id)"
         query1 = f"select customer.phone_num from trans_info,order,customer where (trans_info.state=”損壞” AND trans_info.order_id= order.order_id AND order.cus_id = customer.cus_id)"
-        cursor.execute(query)
+        cursor.execute(query1)
         result = cursor.fetchall()
         for row in result:
             print(row)
         id1 = f"SELECT order_id FROM order ORDER BY id DESC LIMIT 0 , 1"
         query2 = f"INSERT INTO order VALUES (id1[0]+(int(id[1:3])+1),(SELECT order.cus_id,order.price FROM order,trans_info WHERE (trans_info.state=”損壞” AND trans_info.order_id= order.order_id)),CURDATE())"
-        cursor.execute(query)
+        cursor.execute(query2)
         connection.commit()
         print()
         cursor.close()
@@ -149,8 +131,7 @@ def findruined(connection):
 def searchInventory(connection, sth, whe):
     try:
         cursor = connection.cursor()
-        # query = f"SELECT amount FROM {where} WHERE name=='{sth}'"
-        query = f"SELECT ID FROM {whe} WHERE ID=55"
+        query = f"SELECT amount FROM {whe} WHERE name=={sth}"
         cursor.execute(query)
         result = cursor.fetchall()
         for row in result:
@@ -199,16 +180,16 @@ def main():
         str=list(input().split())
         if(str[0]=='?'):
             command()
-        elif(str[0]=='search'):
-            searchInventory(connection, str[1], str[2])
-        elif(str[0]=='insert'):
-            insertOrder(connection, str[1])
-        elif(str[0]=='record'):
-            recordInventory(connection, str[1], str[2])
+        # elif(str[0]=='search'):
+            # searchInventory(connection, str[1], str[2])
+        # elif(str[0]=='insert'):
+            # insertOrder(connection, str[1])
+        # elif(str[0]=='record'):
+            # recordInventory(connection, str[1], str[2])
         elif(str[0]=='maxCostCustomer'):
             maxCostCustomer(connection)
-        elif(str[0]=='searchTopTwoTotalPrice'):
-            searchTopTwoTotalPrice(connection)
+        elif(str[0]=='topTwoTotalPrice'):
+            topTwoTotalPrice(connection)
         elif(str[0]=='notInKaohsiung'):
             notInKaohsiung(connection)
         elif(str[0]=='findDelay'):
