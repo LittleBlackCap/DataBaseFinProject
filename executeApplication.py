@@ -1,14 +1,14 @@
 # coding=utf-8
 import mariadb
-
+import re
 
 def create_connection():
     try:
         user_setting = {
-            "user": "411077014",
-            "password": "411077014",
+            "user": "411077026",
+            "password": "411077026",
             "host": "140.127.74.226",
-            "database": "411077014",
+            "database": "411077026",
         }
         connection = mariadb.connect(**user_setting)
         return connection
@@ -50,8 +50,8 @@ def maxCostCustomer(connection):
         cursor.execute(query)
         result = cursor.fetchone()
         for row in result:
-            print(row)
-        print()
+            print(row,end=" ")
+        print("\n")
         cursor.close()
     except mariadb.Error as e:
         print(f"資料庫錯誤: {e}\n")
@@ -78,12 +78,12 @@ def topTwoTotalPrice(connection):
         query = """
             SELECT item_name
             FROM item 
-            WHERE (item_id=(%s) OR item_id=(%s))
+            WHERE (item_id = %s OR item_id = %s)
         """
         cursor.execute(query, (maxIndex + 1, secondIndex + 1))
         result = cursor.fetchall()
         for row in result:
-            print(row)
+            print(row[0])
         print()
         cursor.close()
     except mariadb.Error as e:
@@ -102,7 +102,7 @@ def notInKaohsiung(connection):
         cursor.execute(query)
         result = cursor.fetchall()
         for row in result:
-            print(row)
+            print(row[0])
         print()
         cursor.close()
     except mariadb.Error as e:
@@ -120,8 +120,8 @@ def findDelay(connection):
         cursor.execute(query)
         result = cursor.fetchall()
         for row in result:
-            print(row)
-        print()
+            print(row[0],end=" ")
+        print("\n")
         cursor.close()
     except mariadb.Error as e:
         print(f"資料庫錯誤: {e}\n")
@@ -137,67 +137,61 @@ def findruined(connection):
         """
         cursor.execute(query)
         cus1 = cursor.fetchall()
-        print("costumer: ",end="")
+        print("costumer: ", end="")
         for row in cus1:
-            print(row)
-
+            print(row[0])
         query = """
             SELECT phone_num 
             FROM customer 
-            WHERE cus_id= (%s)
+            WHERE cus_id = %s
         """
-        cursor.execute(query, (cus1,))
-        result = cursor.fetchall()
-        print("此名顧客的聯絡方式為: ", end="")
-        for row in result:
-            print(row)
-
-        # query = """
-        #     SELECT SUM(item.item_price)
-        #     FROM item,product,trans_info
-        #     WHERE (trans_info.state='物件毀損' AND trans_info.order_id = product.order AND product.item_id = item.item_id)
-        # """
-        # query = """
-        #     SELECT SUM(item_price)
-        #     FROM item
-        #     WHERE item.id IN %s
-        # """
-        # cursor.execute(query, (items))
-        # items_sum = cursor.fetchall()
-
+        for row in cus1:
+            cursor.execute(query, (row[0],))
+            result = cursor.fetchall()
+            print("此名顧客的聯絡方式為: ", end="")
+            for row in result:
+                print(row[0])
 
         query = """
-            SELECT item_id 
-            FROM product 
-            WHERE state = '物件毀損'
+            SELECT DISTINCT product.item_id 
+            FROM product, trans_info
+            WHERE (trans_info.state = '物件毀損' AND trans_info.order_id = product.order_id)
         """
         cursor.execute(query)
         items = cursor.fetchall()
-        for row in items:
-            print(row)
+        # for row in items:
+        #     print(row[0],end=" ")
+        # print()
 
         query = """
-            SELECT SUM(item_price)
-            FROM item
-            WHERE item_id IN %s
-        """
-        cursor.execute(query, (items,))
-        items_sum = cursor.fetchall()
-        for row in items_sum:
-            print(row)
+            SELECT orders.price
+            FROM trans_info, orders
+            WHERE (trans_info.state = '物件毀損' AND trans_info.order_id = orders.order_id)
+        """        
+        cursor.execute(query)
+        orders_price = cursor.fetchall()
+        # for row in orders_price:
+        #     print(row[0])
 
         query = """
             SELECT order_id
             FROM orders
             ORDER BY order_id DESC
         """
-        cursor.execute(query, (items,))
-        lastOrder_id = cursor.fetchone()
-        for row in lastOrder_id:
-            print(row)
+        cursor.execute(query)
+        lastOrder_id = cursor.fetchone()[0]
+        # for row in lastOrder_id:
+        #     print(row[0],end="")
+        # print()
 
-        query = "INSERT INTO orders VALUES ((%s[0]+(int(%s)[1:len(%s)])+1),%s,%s,CURDATE())"
-        cursor.execute(query, (lastOrder_id, lastOrder_id, lastOrder_id, cus1, items_sum))
+        lastOrder_num = re.search(r'\d+', lastOrder_id).group()
+        new_order_id = lastOrder_id.replace(lastOrder_num, str(int(lastOrder_num) + 1))
+        lastOrder_num = str(new_order_id)
+        cus1_str = str(cus1[0][0])
+        orders_price_str = str(orders_price[0][0])
+
+        query = "INSERT INTO orders VALUES (%s, %s, %s, CURDATE())"
+        cursor.execute(query, (lastOrder_num, cus1_str, orders_price_str))
         connection.commit()
         print()
         cursor.close()
@@ -213,19 +207,19 @@ def searchInventory(connection, sth, whe):
             cursor.execute(query)
             result = cursor.fetchall()
             for row in result:
-                print(row)
+                print(row[0])
         elif whe == "Taipei":
             query = f"SELECT Taipei_store FROM shop WHERE item_id={sth}"
             cursor.execute(query)
             result = cursor.fetchall()
             for row in result:
-                print(row)
+                print(row[0])
         else:
             query = f"SELECT Kaohsiung_store FROM shop WHERE item_id={sth}"
             cursor.execute(query)
             result = cursor.fetchall()
             for row in result:
-                print(row)
+                print(row[0])
         print()
         cursor.close()
     except mariadb.Error as e:
@@ -269,7 +263,7 @@ def main():
     connection = create_connection()
     # print("請輸入您的身份(數字): 1 Customer service/ 2 Call center staff/ 3 The stocking clerks")
     # position=int(input())
-    print("(若不知要查詢什麼可以按「？」、若要結束按「bye」)")
+    print("(若不知要查詢什麼可以輸入「？」、若要結束輸入「bye」)")
     while 1:
         print("要查詢:", end=" ")
         str = list(input().split())
