@@ -6,21 +6,26 @@
 
 　　本次專案的呈現方式是在執行框內以文字方式呈現，可輸入「？」查看可輸入的指令，若要結束請輸入「bye」。
 
-　　輸入指令：maxCostCustomer 
+輸入指令：maxCostCustomer 
+　　
 　　查找過去一年中以價格計算購買最多（最高金額）的顧客。
 
-　　輸入指令：searchTopTwoTotalPrice 
+輸入指令：searchTopTwoTotalPrice 
+
 　　查找過去一年中按銷售金額計算的前2個產品。
  
-　　輸入指令：notInKaohsiung 
+輸入指令：notInKaohsiung 
+
 　　查找所有在高雄的商店都缺貨的產品。
 
-　　輸入指令：findDelay 
+輸入指令：findDelay 
+
 　　查找未按照承諾的時間交付的包裹。
 
-　　輸入指令：findruined 
+輸入指令：findruined 
+
 　　查找已損壞的包裹、查找顧客的聯繫信息。此外，查找該包裹的內容並創建替換商品的新包裹。
 
-　　輸入指令：search something where 
-　　查詢本地或附近的商品庫存
+輸入指令：search something where 
 
+　　查詢本地或附近的商品庫存
