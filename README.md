@@ -3,6 +3,7 @@
 接下來依序是ER圖、relation schema、負責執行的PYTHON檔。
 
 以下是executeApplication中的功能介紹：
+
 　　本次專案的呈現方式是在執行框內以文字方式呈現，可輸入「？」查看可輸入的指令，若要結束請輸入「bye」。
 
 　　輸入指令：maxCostCustomer 
