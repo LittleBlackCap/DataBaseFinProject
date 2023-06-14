@@ -32,10 +32,10 @@ def command():
     print("topTwoTotalPrice 查找過去一年中按銷售金額計算的前2個產品")
     print("notInKaohsiung 查找所有在高雄的商店都缺貨的產品")
     print("findDelay 查找未按照承諾的時間交付的包裹")
-    print("findruined 查找在事故中損壞包裹的顧客聯繫信息。此外，查找該包裹的內容並創建替換商品的新包裹。")  # 還有問題
+    print("findruined 查找在事故中損壞包裹的顧客聯繫信息。此外，查找該包裹的內容並創建替換商品的新包裹。")
     print("search something(item_id) where(depot,Taipei,Kaohsiung) 查詢本地或附近的商品庫存")
-    print("insert phonenumber 訪問顧客數據、輸入電話訂單")  # 還有問題
-    print("record something where 記錄進貨和更新庫存")  # 還有問題
+    # print("insert phonenumber 訪問顧客數據、輸入電話訂單")  # 還有問題
+    # print("record something where 記錄進貨和更新庫存")  # 還有問題
     print()
 
 
@@ -193,6 +193,7 @@ def findruined(connection):
         query = "INSERT INTO orders VALUES (%s, %s, %s, CURDATE())"
         cursor.execute(query, (lastOrder_num, cus1_str, orders_price_str))
         connection.commit()
+        print("新增訂單成功 ! ")
         print()
         cursor.close()
     except mariadb.Error as e:
