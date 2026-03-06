@@ -28,4 +28,6 @@
 
 　　輸入指令：search something where 
 
-　　　　查詢本地或附近的商品庫存（something 指的是 1～24 的商品編號；where 指的是存放在哪裡的）
+　　　　查詢本地或附近的商品庫存（something 指的是 1～24 的商品編號；where 指的是存放在哪裡的
+    
+.github只是測試加入之自動化流程，可忽略。
